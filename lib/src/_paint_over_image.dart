@@ -368,6 +368,9 @@ class ImagePainterState extends State<ImagePainter> {
     _textController = TextEditingController();
     _transformationController = TransformationController();
     textDelegate = widget.textDelegate ?? TextDelegate();
+    _controller.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
@@ -383,8 +386,7 @@ class ImagePainterState extends State<ImagePainter> {
 
   bool get isEdited => _controller.paintHistory.isNotEmpty;
 
-  Size get imageSize =>
-      Size(_image?.width.toDouble() ?? 0, _image?.height.toDouble() ?? 0);
+  Size get imageSize => Size(_image?.width.toDouble() ?? 0, _image?.height.toDouble() ?? 0);
 
   ///Converts the incoming image type from constructor to [ui.Image]
   Future<void> _resolveAndConvertImage() async {
@@ -446,8 +448,9 @@ class ImagePainterState extends State<ImagePainter> {
   Future<ui.Image> _loadNetworkImage(String path) async {
     final completer = Completer<ImageInfo>();
     var img = NetworkImage(path);
-    img.resolve(const ImageConfiguration()).addListener(
-        ImageStreamListener((info, _) => completer.complete(info)));
+    img
+        .resolve(const ImageConfiguration())
+        .addListener(ImageStreamListener((info, _) => completer.complete(info)));
     final imageInfo = await completer.future;
     _isLoaded.value = true;
     return imageInfo.image;
@@ -560,13 +563,11 @@ class ImagePainterState extends State<ImagePainter> {
             children: [
               IconButton(
                   tooltip: textDelegate.undo,
-                  icon: widget.undoIcon ??
-                      Icon(Icons.reply, color: Colors.grey[700]),
+                  icon: widget.undoIcon ?? Icon(Icons.reply, color: Colors.grey[700]),
                   onPressed: () => _controller.undo()),
               IconButton(
                 tooltip: textDelegate.clearAllProgress,
-                icon: widget.clearAllIcon ??
-                    Icon(Icons.clear, color: Colors.grey[700]),
+                icon: widget.clearAllIcon ?? Icon(Icons.clear, color: Colors.grey[700]),
                 onPressed: () => _controller.clear(),
               ),
             ],
@@ -577,8 +578,7 @@ class ImagePainterState extends State<ImagePainter> {
   }
 
   _scaleStartGesture(ScaleStartDetails onStart) {
-    final _zoomAdjustedOffset =
-        _transformationController.toScene(onStart.localFocalPoint);
+    final _zoomAdjustedOffset = _transformationController.toScene(onStart.localFocalPoint);
     if (!widget.isSignature) {
       _controller.setStart(_zoomAdjustedOffset);
       _controller.addOffsets(_zoomAdjustedOffset);
@@ -587,8 +587,7 @@ class ImagePainterState extends State<ImagePainter> {
 
   ///Fires while user is interacting with the screen to record painting.
   void _scaleUpdateGesture(ScaleUpdateDetails onUpdate) {
-    final _zoomAdjustedOffset =
-        _transformationController.toScene(onUpdate.localFocalPoint);
+    final _zoomAdjustedOffset = _transformationController.toScene(onUpdate.localFocalPoint);
     _controller.setInProgress(true);
     if (_controller.start == null) {
       _controller.setStart(_zoomAdjustedOffset);
@@ -598,9 +597,9 @@ class ImagePainterState extends State<ImagePainter> {
       _controller.addOffsets(_zoomAdjustedOffset);
     }
     if (_controller.onTextUpdateMode) {
-      _controller.paintHistory
-          .lastWhere((element) => element.mode == PaintMode.text)
-          .offset = [_zoomAdjustedOffset];
+      _controller.paintHistory.lastWhere((element) => element.mode == PaintMode.text).offset = [
+        _zoomAdjustedOffset
+      ];
     }
   }
 
@@ -644,9 +643,7 @@ class ImagePainterState extends State<ImagePainter> {
     final painter = DrawImage(image: _image, controller: _controller);
     final size = Size(_image!.width.toDouble(), _image!.height.toDouble());
     painter.paint(canvas, size);
-    return recorder
-        .endRecording()
-        .toImage(size.width.floor(), size.height.floor());
+    return recorder.endRecording().toImage(size.width.floor(), size.height.floor());
   }
 
   PopupMenuItem _showOptionsRow() {
@@ -661,8 +658,7 @@ class ImagePainterState extends State<ImagePainter> {
                     data: item,
                     isSelected: _controller.mode == item.mode,
                     onTap: () {
-                      if (widget.onPaintModeChanged != null &&
-                          item.mode != null) {
+                      if (widget.onPaintModeChanged != null && item.mode != null) {
                         widget.onPaintModeChanged!(item.mode!);
                       }
                       _controller.setMode(item.mode!);
@@ -730,16 +726,14 @@ class ImagePainterState extends State<ImagePainter> {
   Future<Uint8List?> exportImage() async {
     late ui.Image _convertedImage;
     if (widget.isSignature) {
-      final _boundary = _repaintKey.currentContext!.findRenderObject()
-          as RenderRepaintBoundary;
+      final _boundary = _repaintKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
       _convertedImage = await _boundary.toImage(pixelRatio: 3);
     } else if (widget.byteArray != null && _controller.paintHistory.isEmpty) {
       return widget.byteArray;
     } else {
       _convertedImage = await _renderImage();
     }
-    final byteData =
-        await _convertedImage.toByteData(format: ui.ImageByteFormat.png);
+    final byteData = await _convertedImage.toByteData(format: ui.ImageByteFormat.png);
     return byteData?.buffer.asUint8List();
   }
 
@@ -781,73 +775,72 @@ class ImagePainterState extends State<ImagePainter> {
   }
 
   Widget _buildControls() {
+    var children = <Widget>[];
+    for (final item in paintModes2(textDelegate)) {
+      final button = IconButton(
+        onPressed: () {
+          if (widget.onPaintModeChanged != null && item.mode != null) {
+            widget.onPaintModeChanged!(item.mode!);
+          }
+          _controller.setMode(item.mode!);
+        },
+        tooltip: item.label,
+        icon: Icon(item.icon,
+            color: _controller.mode == item.mode ? _controller.color : Colors.black),
+      );
+      children.add(button);
+    }
+
+    children.addAll([
+      AnimatedBuilder(
+        animation: _controller,
+        builder: (_, __) {
+          return PopupMenuButton(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            shape: ContinuousRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            tooltip: textDelegate.changeColor,
+            icon: widget.colorIcon ??
+                Container(
+                  padding: const EdgeInsets.all(2.0),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.grey),
+                    color: _controller.color,
+                  ),
+                ),
+            itemBuilder: (_) => [_showColorPicker()],
+          );
+        },
+      ),
+      PopupMenuButton(
+        tooltip: textDelegate.changeBrushSize,
+        shape: ContinuousRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        icon: widget.brushIcon ?? Icon(Icons.brush, color: Colors.grey[700]),
+        itemBuilder: (_) => [_showRangeSlider()],
+      ),
+      IconButton(icon: const Icon(Icons.text_format), onPressed: _openTextDialog),
+      const Spacer(),
+      IconButton(
+        tooltip: textDelegate.undo,
+        icon: widget.undoIcon ?? Icon(Icons.reply, color: Colors.grey[700]),
+        onPressed: () => _controller.undo(),
+      ),
+      IconButton(
+        tooltip: textDelegate.clearAllProgress,
+        icon: widget.clearAllIcon ?? Icon(Icons.clear, color: Colors.grey[700]),
+        onPressed: () => _controller.clear(),
+      ),
+    ]);
+
     return Container(
       padding: const EdgeInsets.all(4),
       color: Colors.grey[200],
       child: Row(
-        children: [
-          AnimatedBuilder(
-            animation: _controller,
-            builder: (_, __) {
-              final icon = paintModes(textDelegate)
-                  .firstWhere((item) => item.mode == _controller.mode)
-                  .icon;
-              return PopupMenuButton(
-                tooltip: textDelegate.changeMode,
-                shape: ContinuousRectangleBorder(
-                  borderRadius: BorderRadius.circular(40),
-                ),
-                icon: Icon(icon, color: Colors.grey[700]),
-                itemBuilder: (_) => [_showOptionsRow()],
-              );
-            },
-          ),
-          AnimatedBuilder(
-            animation: _controller,
-            builder: (_, __) {
-              return PopupMenuButton(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                shape: ContinuousRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                tooltip: textDelegate.changeColor,
-                icon: widget.colorIcon ??
-                    Container(
-                      padding: const EdgeInsets.all(2.0),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.grey),
-                        color: _controller.color,
-                      ),
-                    ),
-                itemBuilder: (_) => [_showColorPicker()],
-              );
-            },
-          ),
-          PopupMenuButton(
-            tooltip: textDelegate.changeBrushSize,
-            shape: ContinuousRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            icon:
-                widget.brushIcon ?? Icon(Icons.brush, color: Colors.grey[700]),
-            itemBuilder: (_) => [_showRangeSlider()],
-          ),
-          IconButton(
-              icon: const Icon(Icons.text_format), onPressed: _openTextDialog),
-          const Spacer(),
-          IconButton(
-            tooltip: textDelegate.undo,
-            icon: widget.undoIcon ?? Icon(Icons.reply, color: Colors.grey[700]),
-            onPressed: () => _controller.undo(),
-          ),
-          IconButton(
-            tooltip: textDelegate.clearAllProgress,
-            icon: widget.clearAllIcon ??
-                Icon(Icons.clear, color: Colors.grey[700]),
-            onPressed: () => _controller.clear(),
-          ),
-        ],
+        children: children,
       ),
     );
   }

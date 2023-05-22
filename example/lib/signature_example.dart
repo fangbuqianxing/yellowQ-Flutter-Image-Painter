@@ -36,7 +36,8 @@ class _SignatureExampleState extends State<SignatureExample> {
   }
 
   void saveImage() async {
-    final image = await _imageKey.currentState.exportImage();
+    final image = await _imageKey.currentState?.exportImage();
+    if (image == null) return;
     final directory = (await getApplicationDocumentsDirectory()).path;
     await Directory('$directory/sample').create(recursive: true);
     final fullPath = '$directory/sample/image.png';

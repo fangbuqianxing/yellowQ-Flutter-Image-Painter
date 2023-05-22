@@ -33,7 +33,8 @@ class _ImagePainterExampleState extends State<ImagePainterExample> {
   final _key = GlobalKey<ScaffoldState>();
 
   void saveImage() async {
-    final image = await _imageKey.currentState.exportImage();
+    final image = await _imageKey.currentState?.exportImage();
+    if (image == null) return;
     final directory = (await getApplicationDocumentsDirectory()).path;
     await Directory('$directory/sample').create(recursive: true);
     final fullPath =
