@@ -43,6 +43,7 @@ class ImagePainter extends StatefulWidget {
     this.onColorChanged,
     this.onStrokeWidthChanged,
     this.onPaintModeChanged,
+    this.saveImage,
     this.textDelegate,
   }) : super(key: key);
 
@@ -155,6 +156,7 @@ class ImagePainter extends StatefulWidget {
     ValueChanged<PaintMode>? onPaintModeChanged,
     ValueChanged<Color>? onColorChanged,
     ValueChanged<double>? onStrokeWidthChanged,
+    ValueSetter<Uint8List>? saveImage,
     TextDelegate? textDelegate,
     bool? controlsAtTop,
   }) {
@@ -327,6 +329,8 @@ class ImagePainter extends StatefulWidget {
   final ValueChanged<double>? onStrokeWidthChanged;
 
   final ValueChanged<PaintMode>? onPaintModeChanged;
+
+  final ValueSetter<Uint8List>? saveImage;
 
   //the text delegate
   final TextDelegate? textDelegate;
@@ -702,8 +706,8 @@ class ImagePainterState extends State<ImagePainter> {
         child: Center(
           child: Wrap(
             alignment: WrapAlignment.center,
-            spacing: 10,
-            runSpacing: 10,
+            spacing: 5,
+            runSpacing: 5,
             children: (widget.colors ?? editorColors).map((color) {
               return ColorItem(
                 isSelected: color == _controller.color,
@@ -735,6 +739,12 @@ class ImagePainterState extends State<ImagePainter> {
     }
     final byteData = await _convertedImage.toByteData(format: ui.ImageByteFormat.png);
     return byteData?.buffer.asUint8List();
+  }
+
+  void _saveImage() async {
+    final image = await exportImage();
+    if (image == null) return;
+    widget.saveImage?.call(image);
   }
 
   void _addPaintHistory(PaintInfo info) {
@@ -790,8 +800,9 @@ class ImagePainterState extends State<ImagePainter> {
       );
       children.add(button);
     }
-
+    final divider = Container(color: Colors.grey[400], constraints: const BoxConstraints(maxWidth: 1, minWidth: 1, maxHeight: 25, minHeight: 10), child: ConstrainedBox(constraints: const BoxConstraints.expand()),);
     children.addAll([
+      divider,
       AnimatedBuilder(
         animation: _controller,
         builder: (_, __) {
@@ -819,11 +830,11 @@ class ImagePainterState extends State<ImagePainter> {
         shape: ContinuousRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
-        icon: widget.brushIcon ?? Icon(Icons.brush, color: Colors.grey[700]),
+        icon: widget.brushIcon ?? Icon(Icons.line_weight, color: Colors.grey[700]),
         itemBuilder: (_) => [_showRangeSlider()],
       ),
       IconButton(icon: const Icon(Icons.text_format), onPressed: _openTextDialog),
-      const Spacer(),
+      divider,
       IconButton(
         tooltip: textDelegate.undo,
         icon: widget.undoIcon ?? Icon(Icons.reply, color: Colors.grey[700]),
@@ -834,6 +845,8 @@ class ImagePainterState extends State<ImagePainter> {
         icon: widget.clearAllIcon ?? Icon(Icons.clear, color: Colors.grey[700]),
         onPressed: () => _controller.clear(),
       ),
+      const Spacer(),
+      IconButton(icon: const Icon(Icons.done, color: Colors.green,), onPressed: _saveImage,),
     ]);
 
     return Container(

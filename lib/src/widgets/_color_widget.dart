@@ -12,9 +12,9 @@ class ColorItem extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(3.0),
         child: Container(
-          padding: const EdgeInsets.all(2),
+          padding: const EdgeInsets.all(1),
           decoration: BoxDecoration(
             color: isSelected! ? Colors.white70 : Colors.transparent,
             shape: BoxShape.circle,
@@ -22,7 +22,7 @@ class ColorItem extends StatelessWidget {
                 color: isSelected! ? Colors.black : Colors.grey[200]!),
           ),
           child: CircleAvatar(
-              radius: isSelected! ? 16 : 12, backgroundColor: color),
+              radius: isSelected! ? 13 : 10, backgroundColor: color),
         ),
       ),
     );
@@ -30,18 +30,18 @@ class ColorItem extends StatelessWidget {
 }
 
 const List<Color> editorColors = [
-  Colors.black,
-  Colors.white,
   Colors.red,
-  Colors.grey,
+  Colors.pink,
+  Colors.greenAccent,
+  Colors.green,
   Colors.teal,
   Colors.cyan,
   Colors.blue,
   Colors.blueAccent,
-  Colors.greenAccent,
-  Colors.green,
-  Colors.pink,
   Colors.yellow,
   Colors.orange,
   Colors.brown,
+  Colors.grey,
+  Colors.black,
+  Colors.white,
 ];
