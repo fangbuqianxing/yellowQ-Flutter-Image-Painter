@@ -178,6 +178,7 @@ class ImagePainter extends StatefulWidget {
       onPaintModeChanged: onPaintModeChanged,
       onColorChanged: onColorChanged,
       onStrokeWidthChanged: onStrokeWidthChanged,
+      saveImage: saveImage,
       textDelegate: textDelegate,
       controlsAtTop: controlsAtTop ?? true,
     );
