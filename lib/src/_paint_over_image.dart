@@ -801,6 +801,7 @@ class ImagePainterState extends State<ImagePainter> {
       );
       children.add(button);
     }
+    const grey700 = Color(0xFF616161);
     final divider = Container(color: Colors.grey[400], constraints: const BoxConstraints(maxWidth: 1, minWidth: 1, maxHeight: 25, minHeight: 10), child: ConstrainedBox(constraints: const BoxConstraints.expand()),);
     children.addAll([
       divider,
@@ -831,19 +832,19 @@ class ImagePainterState extends State<ImagePainter> {
         shape: ContinuousRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
-        icon: widget.brushIcon ?? Icon(Icons.line_weight, color: Colors.grey[700]),
+        icon: widget.brushIcon ?? const Icon(Icons.line_weight, color: grey700),
         itemBuilder: (_) => [_showRangeSlider()],
       ),
-      IconButton(tooltip: textDelegate.text, icon: const Icon(Icons.text_format), onPressed: _openTextDialog),
+      IconButton(tooltip: textDelegate.text, icon: const Icon(Icons.text_format, color: grey700), onPressed: _openTextDialog),
       divider,
       IconButton(
         tooltip: textDelegate.undo,
-        icon: widget.undoIcon ?? Icon(Icons.reply, color: Colors.grey[700]),
+        icon: widget.undoIcon ?? const Icon(Icons.reply, color: grey700),
         onPressed: () => _controller.undo(),
       ),
       IconButton(
         tooltip: textDelegate.clearAllProgress,
-        icon: widget.clearAllIcon ?? Icon(Icons.clear, color: Colors.grey[700]),
+        icon: widget.clearAllIcon ?? const Icon(Icons.clear, color: grey700),
         onPressed: () => _controller.clear(),
       ),
       const Spacer(),
