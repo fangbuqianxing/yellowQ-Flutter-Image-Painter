@@ -834,7 +834,7 @@ class ImagePainterState extends State<ImagePainter> {
         icon: widget.brushIcon ?? Icon(Icons.line_weight, color: Colors.grey[700]),
         itemBuilder: (_) => [_showRangeSlider()],
       ),
-      IconButton(icon: const Icon(Icons.text_format), onPressed: _openTextDialog),
+      IconButton(tooltip: textDelegate.text, icon: const Icon(Icons.text_format), onPressed: _openTextDialog),
       divider,
       IconButton(
         tooltip: textDelegate.undo,
@@ -847,7 +847,7 @@ class ImagePainterState extends State<ImagePainter> {
         onPressed: () => _controller.clear(),
       ),
       const Spacer(),
-      IconButton(icon: const Icon(Icons.done, color: Colors.green,), onPressed: _saveImage,),
+      IconButton(tooltip: textDelegate.saveImage, icon: const Icon(Icons.done, color: Colors.green,), onPressed: _saveImage,),
     ]);
 
     return Container(

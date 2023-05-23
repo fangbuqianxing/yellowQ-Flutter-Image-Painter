@@ -101,7 +101,7 @@ List<ModeData> paintModes2(TextDelegate textDelegate) => [
   ModeData(
       icon: Icons.text_format,
       mode: PaintMode.text,
-      label: textDelegate.text),
+      label: textDelegate.moveText),
 ];
 
 @immutable

@@ -42,4 +42,12 @@ class DutchTextDelegate implements TextDelegate {
 
   @override
   String get undo => "ongedaan maken";
+
+  @override
+  // TODO: implement moveText
+  String get moveText => 'move Text 1';
+
+  @override
+  // TODO: implement saveImage
+  String get saveImage => 'save Image 1';
 }

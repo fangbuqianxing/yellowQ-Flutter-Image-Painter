@@ -7,10 +7,12 @@ class TextDelegate {
   final String arrow = "Arrow";
   final String dashLine = "Dash line";
   final String text = "Text";
+  final String moveText = "Move text";
   final String changeMode = "Change Mode";
   final String changeColor = "Change Color";
   final String changeBrushSize = "Change Brush Size";
   final String undo = "Undo";
   final String done = "Done";
   final String clearAllProgress = "Clear All Progress";
+  final String saveImage = "Save image";
 }
