@@ -803,6 +803,7 @@ class ImagePainterState extends State<ImagePainter> {
     }
     const grey700 = Color(0xFF616161);
     final divider = Container(color: Colors.grey[400], constraints: const BoxConstraints(maxWidth: 1, minWidth: 1, maxHeight: 25, minHeight: 10), child: ConstrainedBox(constraints: const BoxConstraints.expand()),);
+    final historyActionColor = _controller.paintHistory.isEmpty ? Colors.grey : grey700;
     children.addAll([
       divider,
       AnimatedBuilder(
@@ -839,12 +840,12 @@ class ImagePainterState extends State<ImagePainter> {
       divider,
       IconButton(
         tooltip: textDelegate.undo,
-        icon: widget.undoIcon ?? const Icon(Icons.reply, color: grey700),
+        icon: widget.undoIcon ?? Icon(Icons.reply, color: historyActionColor),
         onPressed: () => _controller.undo(),
       ),
       IconButton(
         tooltip: textDelegate.clearAllProgress,
-        icon: widget.clearAllIcon ?? const Icon(Icons.clear, color: grey700),
+        icon: widget.clearAllIcon ?? Icon(Icons.clear, color: historyActionColor),
         onPressed: () => _controller.clear(),
       ),
       const Spacer(),
