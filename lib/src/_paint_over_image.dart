@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide Image;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -391,7 +392,8 @@ class ImagePainterState extends State<ImagePainter> {
 
   bool get isEdited => _controller.paintHistory.isNotEmpty;
 
-  Size get imageSize => Size(_image?.width.toDouble() ?? 0, _image?.height.toDouble() ?? 0);
+  Size get imageSize =>
+      Size(_image?.width.toDouble() ?? 0, _image?.height.toDouble() ?? 0);
 
   ///Converts the incoming image type from constructor to [ui.Image]
   Future<void> _resolveAndConvertImage() async {
@@ -453,9 +455,8 @@ class ImagePainterState extends State<ImagePainter> {
   Future<ui.Image> _loadNetworkImage(String path) async {
     final completer = Completer<ImageInfo>();
     var img = NetworkImage(path);
-    img
-        .resolve(const ImageConfiguration())
-        .addListener(ImageStreamListener((info, _) => completer.complete(info)));
+    img.resolve(const ImageConfiguration()).addListener(
+        ImageStreamListener((info, _) => completer.complete(info)));
     final imageInfo = await completer.future;
     _isLoaded.value = true;
     return imageInfo.image;
@@ -568,11 +569,13 @@ class ImagePainterState extends State<ImagePainter> {
             children: [
               IconButton(
                   tooltip: textDelegate.undo,
-                  icon: widget.undoIcon ?? Icon(Icons.reply, color: Colors.grey[700]),
+                  icon: widget.undoIcon ??
+                      Icon(Icons.reply, color: Colors.grey[700]),
                   onPressed: () => _controller.undo()),
               IconButton(
                 tooltip: textDelegate.clearAllProgress,
-                icon: widget.clearAllIcon ?? Icon(Icons.clear, color: Colors.grey[700]),
+                icon: widget.clearAllIcon ??
+                    Icon(Icons.clear, color: Colors.grey[700]),
                 onPressed: () => _controller.clear(),
               ),
             ],
@@ -583,7 +586,8 @@ class ImagePainterState extends State<ImagePainter> {
   }
 
   _scaleStartGesture(ScaleStartDetails onStart) {
-    final _zoomAdjustedOffset = _transformationController.toScene(onStart.localFocalPoint);
+    final _zoomAdjustedOffset =
+        _transformationController.toScene(onStart.localFocalPoint);
     if (!widget.isSignature) {
       _controller.setStart(_zoomAdjustedOffset);
       _controller.addOffsets(_zoomAdjustedOffset);
@@ -592,7 +596,8 @@ class ImagePainterState extends State<ImagePainter> {
 
   ///Fires while user is interacting with the screen to record painting.
   void _scaleUpdateGesture(ScaleUpdateDetails onUpdate) {
-    final _zoomAdjustedOffset = _transformationController.toScene(onUpdate.localFocalPoint);
+    final _zoomAdjustedOffset =
+        _transformationController.toScene(onUpdate.localFocalPoint);
     _controller.setInProgress(true);
     if (_controller.start == null) {
       _controller.setStart(_zoomAdjustedOffset);
@@ -602,9 +607,9 @@ class ImagePainterState extends State<ImagePainter> {
       _controller.addOffsets(_zoomAdjustedOffset);
     }
     if (_controller.onTextUpdateMode) {
-      _controller.paintHistory.lastWhere((element) => element.mode == PaintMode.text).offset = [
-        _zoomAdjustedOffset
-      ];
+      _controller.paintHistory
+          .lastWhere((element) => element.mode == PaintMode.text)
+          .offset = [_zoomAdjustedOffset];
     }
   }
 
@@ -648,57 +653,39 @@ class ImagePainterState extends State<ImagePainter> {
     final painter = DrawImage(image: _image, controller: _controller);
     final size = Size(_image!.width.toDouble(), _image!.height.toDouble());
     painter.paint(canvas, size);
-    return recorder.endRecording().toImage(size.width.floor(), size.height.floor());
+    return recorder
+        .endRecording()
+        .toImage(size.width.floor(), size.height.floor());
   }
 
-  PopupMenuItem _showOptionsRow() {
-    return PopupMenuItem(
-      enabled: false,
-      child: Center(
-        child: SizedBox(
-          child: Wrap(
-            children: paintModes(textDelegate)
-                .map(
-                  (item) => SelectionItems(
-                    data: item,
-                    isSelected: _controller.mode == item.mode,
-                    onTap: () {
-                      if (widget.onPaintModeChanged != null && item.mode != null) {
-                        widget.onPaintModeChanged!(item.mode!);
-                      }
-                      _controller.setMode(item.mode!);
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                )
-                .toList(),
+  List<PopupMenuItem> _showBrushSize() {
+    final items = <PopupMenuItem>[];
+    for (final size in [3.0, 6.0, 9.0]) {
+      items.add(PopupMenuItem(
+        value: size,
+        height: 22,
+        onTap: () {
+          _controller.setStrokeWidth(size);
+          if (widget.onStrokeWidthChanged != null) {
+            widget.onStrokeWidthChanged!(size);
+          }
+        },
+        child: SizedBox.square(
+          dimension: 28,
+          child: Center(
+            child: Container(
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(size * 0.5),
+                color: const Color(0xFF191919),
+              ),
+            ),
           ),
         ),
-      ),
-    );
-  }
-
-  PopupMenuItem _showRangeSlider() {
-    return PopupMenuItem(
-      enabled: false,
-      child: SizedBox(
-        width: double.maxFinite,
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (_, __) {
-            return RangedSlider(
-              value: _controller.strokeWidth,
-              onChanged: (value) {
-                _controller.setStrokeWidth(value);
-                if (widget.onStrokeWidthChanged != null) {
-                  widget.onStrokeWidthChanged!(value);
-                }
-              },
-            );
-          },
-        ),
-      ),
-    );
+      ));
+    }
+    return items;
   }
 
   PopupMenuItem _showColorPicker() {
@@ -707,8 +694,8 @@ class ImagePainterState extends State<ImagePainter> {
         child: Center(
           child: Wrap(
             alignment: WrapAlignment.center,
-            spacing: 5,
-            runSpacing: 5,
+            spacing: 2,
+            runSpacing: 2,
             children: (widget.colors ?? editorColors).map((color) {
               return ColorItem(
                 isSelected: color == _controller.color,
@@ -731,14 +718,16 @@ class ImagePainterState extends State<ImagePainter> {
   Future<Uint8List?> exportImage() async {
     late ui.Image _convertedImage;
     if (widget.isSignature) {
-      final _boundary = _repaintKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final _boundary = _repaintKey.currentContext!.findRenderObject()
+          as RenderRepaintBoundary;
       _convertedImage = await _boundary.toImage(pixelRatio: 3);
     } else if (widget.byteArray != null && _controller.paintHistory.isEmpty) {
       return widget.byteArray;
     } else {
       _convertedImage = await _renderImage();
     }
-    final byteData = await _convertedImage.toByteData(format: ui.ImageByteFormat.png);
+    final byteData =
+        await _convertedImage.toByteData(format: ui.ImageByteFormat.png);
     return byteData?.buffer.asUint8List();
   }
 
@@ -788,75 +777,182 @@ class ImagePainterState extends State<ImagePainter> {
   Widget _buildControls() {
     var children = <Widget>[];
     for (final item in paintModes2(textDelegate)) {
-      final button = IconButton(
-        onPressed: () {
+      final button = ControlItem(
+        onTap: () {
           if (widget.onPaintModeChanged != null && item.mode != null) {
             widget.onPaintModeChanged!(item.mode!);
           }
           _controller.setMode(item.mode!);
         },
+        child: Image(width: 28, height: 28, image: item.icon),
         tooltip: item.label,
-        icon: Icon(item.icon,
-            color: _controller.mode == item.mode ? _controller.color : Colors.black),
+        isSelected: _controller.mode == item.mode,
       );
       children.add(button);
     }
-    const grey700 = Color(0xFF616161);
-    final divider = Container(color: Colors.grey[400], constraints: const BoxConstraints(maxWidth: 1, minWidth: 1, maxHeight: 25, minHeight: 10), child: ConstrainedBox(constraints: const BoxConstraints.expand()),);
-    final historyActionColor = _controller.paintHistory.isEmpty ? Colors.grey : grey700;
+    const black = Color(0xFF191919);
+    final divider = Container(
+      color: Colors.grey[400],
+      constraints: const BoxConstraints(
+          maxWidth: 1, minWidth: 1, maxHeight: 25, minHeight: 10),
+      child: ConstrainedBox(constraints: const BoxConstraints.expand()),
+    );
+    final historyActionColor =
+        _controller.paintHistory.isEmpty ? Colors.grey : black;
     children.addAll([
+      IconButton(
+          tooltip: textDelegate.text,
+          icon: const Icon(Icons.text_format, color: black, weight: 0.1),
+          onPressed: _openTextDialog),
       divider,
       AnimatedBuilder(
         animation: _controller,
         builder: (_, __) {
-          return PopupMenuButton(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            shape: ContinuousRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
+          return ControlItem(
+            isSelected: false,
             tooltip: textDelegate.changeColor,
-            icon: widget.colorIcon ??
-                Container(
-                  padding: const EdgeInsets.all(2.0),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.grey),
-                    color: _controller.color,
+            child: PopupMenuButton(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              constraints: const BoxConstraints(maxWidth: 300),
+              offset: const Offset(0, 40),
+              shape: ContinuousRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              tooltip: textDelegate.changeColor,
+              child: widget.colorIcon ??
+                  Container(
+                    width: 17,
+                    height: 17,
+                    // padding: const EdgeInsets.all(5.0),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.grey),
+                      color: _controller.color,
+                    ),
                   ),
-                ),
-            itemBuilder: (_) => [_showColorPicker()],
+              itemBuilder: (_) => [_showColorPicker()],
+            ),
           );
         },
       ),
-      PopupMenuButton(
+      ControlItem(
+        isSelected: false,
         tooltip: textDelegate.changeBrushSize,
-        shape: ContinuousRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+        child: PopupMenuButton(
+          constraints: const BoxConstraints(maxWidth: 40),
+          offset: const Offset(0, 40),
+          padding: const EdgeInsets.all(0),
+          shape: ContinuousRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          tooltip: textDelegate.changeBrushSize,
+          child: widget.brushIcon ??
+              const Icon(Icons.line_weight, color: Color(0x19191919)),
+          itemBuilder: (_) => _showBrushSize(),
         ),
-        icon: widget.brushIcon ?? const Icon(Icons.line_weight, color: grey700),
-        itemBuilder: (_) => [_showRangeSlider()],
-      ),
-      IconButton(tooltip: textDelegate.text, icon: const Icon(Icons.text_format, color: grey700), onPressed: _openTextDialog),
-      divider,
-      IconButton(
-        tooltip: textDelegate.undo,
-        icon: widget.undoIcon ?? Icon(Icons.reply, color: historyActionColor),
-        onPressed: () => _controller.undo(),
-      ),
-      IconButton(
-        tooltip: textDelegate.clearAllProgress,
-        icon: widget.clearAllIcon ?? Icon(Icons.clear, color: historyActionColor),
-        onPressed: () => _controller.clear(),
       ),
       const Spacer(),
-      IconButton(tooltip: textDelegate.saveImage, icon: const Icon(Icons.done, color: Colors.green,), onPressed: _saveImage,),
+      IconButton(
+        tooltip: textDelegate.undo,
+        icon: Image.asset(
+          textDelegate.undoAssetName,
+          color: historyActionColor,
+          colorBlendMode: BlendMode.srcIn,
+        ),
+        onPressed: () => _controller.undo(),
+      ),
+      const SizedBox(width: 16),
+      TextButton.icon(
+          style: ButtonStyle(
+              shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(3))),
+              backgroundColor:
+                  MaterialStateProperty.all(const Color(0xFF0052D9))),
+          onPressed: _saveImage,
+          icon: const Icon(
+            Icons.done,
+            color: Colors.white,
+            size: 14,
+          ),
+          label: const Text(
+            'Done',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontFamily: 'PingFang SC',
+              fontWeight: FontWeight.w400,
+            ),
+          )),
     ]);
-
+    final EdgeInsets padding;
+    if (Platform.isMacOS) {
+      padding = const EdgeInsets.fromLTRB(84, 0, 20, 0);
+      } else {
+      padding = const EdgeInsets.fromLTRB(20, 0, 64, 0);
+    }
     return Container(
-      padding: const EdgeInsets.all(4),
-      color: Colors.grey[200],
+      height: 44,
+      padding: padding,
+      color: const Color(0x19191919).withOpacity(0.1),
       child: Row(
         children: children,
+      ),
+    );
+  }
+}
+
+class ControlItem extends StatefulWidget {
+  final GestureTapCallback? onTap;
+  final Widget? child;
+  final String? tooltip;
+  final bool isSelected;
+
+  const ControlItem(
+      {Key? key,
+      this.onTap,
+      this.child,
+      this.tooltip,
+      required this.isSelected})
+      : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => _ControlItemState();
+}
+
+class _ControlItemState extends State<ControlItem> {
+  var _isHover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (e) {
+        setState(() {
+          _isHover = true;
+        });
+      },
+      onExit: (e) {
+        setState(() {
+          _isHover = false;
+        });
+      },
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          width: 28,
+          height: 28,
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(4),
+            // border: Border.all(color: Colors.grey),
+            color: (_isHover || widget.isSelected)
+                ? const Color(0x19191919)
+                : null,
+          ),
+          child: Tooltip(
+            message: widget.tooltip,
+            child: Center(child: widget.child),
+          ),
+        ),
       ),
     );
   }

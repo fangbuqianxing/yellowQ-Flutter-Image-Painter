@@ -1,18 +1,34 @@
 class TextDelegate {
   final String noneZoom = "None / Zoom";
+  late final String noneZoomAssetName;
   final String line = "Line";
+  late final String lineAssetName;
   final String rectangle = "Rectangle";
+  late final String rectangleAssetName;
   final String drawing = "Drawing";
+  late final String drawingAssetName;
   final String circle = "Circle";
+  late final String circleAssetName;
   final String arrow = "Arrow";
+  late final String arrowAssetName;
   final String dashLine = "Dash line";
+  late final String dashLineAssetName;
   final String text = "Text";
+  late final String textAssetName;
   final String moveText = "Move text";
+  late final String moveTextAssetName;
   final String changeMode = "Change Mode";
+  late final String changeModeAssetName;
   final String changeColor = "Change Color";
+  late final String changeColorAssetName;
   final String changeBrushSize = "Change Brush Size";
+  late final String changeBrushSizeAssetName;
   final String undo = "Undo";
+  late final String undoAssetName;
   final String done = "Done";
+  late final String doneAssetName;
   final String clearAllProgress = "Clear All Progress";
+  late final String clearAllProgressAssetName;
   final String saveImage = "Save image";
+  late final String saveImageAssetName;
 }
