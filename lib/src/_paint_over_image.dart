@@ -504,6 +504,7 @@ class ImagePainterState extends State<ImagePainter> {
                       panEnabled: _controller.mode == PaintMode.none,
                       scaleEnabled: widget.isScalable!,
                       onInteractionUpdate: _scaleUpdateGesture,
+                      onInteractionStart: _scaleStartGesture,
                       onInteractionEnd: _scaleEndGesture,
                       child: CustomPaint(
                         size: imageSize,
@@ -590,7 +591,13 @@ class ImagePainterState extends State<ImagePainter> {
         _transformationController.toScene(onStart.localFocalPoint);
     if (!widget.isSignature) {
       _controller.setStart(_zoomAdjustedOffset);
-      _controller.addOffsets(_zoomAdjustedOffset);
+
+      if (_controller.mode == PaintMode.text && !_controller.onTextUpdateMode) {
+        _openTextDialog(_zoomAdjustedOffset);
+        _scaleEndGesture(ScaleEndDetails(pointerCount: onStart.pointerCount));
+      } else {
+        _controller.addOffsets(_zoomAdjustedOffset);
+      }
     }
   }
 
@@ -607,9 +614,7 @@ class ImagePainterState extends State<ImagePainter> {
       _controller.addOffsets(_zoomAdjustedOffset);
     }
     if (_controller.onTextUpdateMode) {
-      _controller.paintHistory
-          .lastWhere((element) => element.mode == PaintMode.text)
-          .offset = [_zoomAdjustedOffset];
+      _controller.onTextUpdateInfo?.offset = [_zoomAdjustedOffset];
     }
   }
 
@@ -743,7 +748,7 @@ class ImagePainterState extends State<ImagePainter> {
     }
   }
 
-  void _openTextDialog() {
+  void _openTextDialog(Offset? offset) {
     _controller.setMode(PaintMode.text);
     final fontSize = 6 * _controller.strokeWidth;
 
@@ -762,7 +767,8 @@ class ImagePainterState extends State<ImagePainter> {
                   mode: PaintMode.text,
                   text: _textController.text,
                   paint: _paint,
-                  offset: [],
+                  offset: offset == null ? [] : [offset],
+                  maxSize: imageSize,
                 ),
               );
             },
@@ -779,10 +785,15 @@ class ImagePainterState extends State<ImagePainter> {
     for (final item in paintModes2(textDelegate)) {
       final button = ControlItem(
         onTap: () {
-          if (widget.onPaintModeChanged != null && item.mode != null) {
-            widget.onPaintModeChanged!(item.mode!);
+          var mode = item.mode;
+          if (_controller.mode == mode) {
+            mode = PaintMode.none;
           }
-          _controller.setMode(item.mode!);
+
+          if (widget.onPaintModeChanged != null && mode != null) {
+            widget.onPaintModeChanged!(mode!);
+          }
+          _controller.setMode(mode!);
         },
         child: Image(width: 28, height: 28, image: item.icon),
         tooltip: item.label,
@@ -800,10 +811,6 @@ class ImagePainterState extends State<ImagePainter> {
     final historyActionColor =
         _controller.paintHistory.isEmpty ? Colors.grey : black;
     children.addAll([
-      IconButton(
-          tooltip: textDelegate.text,
-          icon: const Icon(Icons.text_format, color: black, weight: 0.1),
-          onPressed: _openTextDialog),
       divider,
       AnimatedBuilder(
         animation: _controller,

@@ -255,13 +255,47 @@ class PaintInfo {
   ///Used to save text in case of text type.
   String? text;
 
+  Size? maxSize;
+
+  late TextSpan textSpan;
+  late TextPainter textPainter;
+
   ///In case of string, it is used to save string value entered.
   PaintInfo({
     this.offset,
     this.paint,
     this.text,
     this.mode,
-  });
+    this.maxSize,
+  }) {
+    if (mode == PaintMode.text && text != null) {
+      textSpan = TextSpan(
+        text: text,
+        style: TextStyle(
+            color: paint?.color,
+            fontSize: 6 * (paint?.strokeWidth ?? 3),
+            fontWeight: FontWeight.bold),
+      );
+      textPainter = TextPainter(
+        text: textSpan,
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout(minWidth: 0, maxWidth: (maxSize?.width ?? 100));
+      maxSize ??= Size.zero;
+    }
+  }
+
+  Offset textOffset() {
+    return (offset?.isEmpty ?? true)
+        ? Offset(maxSize!.width / 2, maxSize!.height / 2)
+        : Offset(offset![0]!.dx, offset![0]!.dy);
+  }
+
+  Rect textRect() => Rect.fromCenter(
+        center: textOffset(),
+        width: textPainter.width,
+        height: textPainter.height);
 }
 
 @immutable

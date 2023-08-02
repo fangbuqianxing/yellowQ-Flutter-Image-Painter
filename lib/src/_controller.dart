@@ -39,11 +39,9 @@ class Controller extends ChangeNotifier {
 
   Offset? get end => _end;
 
-  bool get onTextUpdateMode =>
-      _mode == PaintMode.text &&
-      _paintHistory
-          .where((element) => element.mode == PaintMode.text)
-          .isNotEmpty;
+  PaintInfo? onTextUpdateInfo;
+
+  bool get onTextUpdateMode => _mode == PaintMode.text && onTextUpdateInfo != null;
 
   Controller({
     double strokeWidth = 4.0,
@@ -105,6 +103,9 @@ class Controller extends ChangeNotifier {
 
   void setStart(Offset? offset) {
     _start = offset;
+    if (mode == PaintMode.text) {
+      onTextUpdateInfo = onTextUpdate(offset!);
+    }
     notifyListeners();
   }
 
@@ -116,6 +117,7 @@ class Controller extends ChangeNotifier {
   void resetStartAndEnd() {
     _start = null;
     _end = null;
+    onTextUpdateInfo = null;
     notifyListeners();
   }
 
@@ -138,5 +140,15 @@ class Controller extends ChangeNotifier {
   void setInProgress(bool val) {
     _paintInProgress = val;
     notifyListeners();
+  }
+
+  PaintInfo? onTextUpdate(Offset offset) {
+    for (final paintInfo in _paintHistory) {
+      if (paintInfo.mode != PaintMode.text) continue;
+      if (paintInfo.textRect().contains(offset)) {
+        return paintInfo;
+      }
+    }
+    return null;
   }
 }
