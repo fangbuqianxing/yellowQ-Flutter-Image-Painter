@@ -590,6 +590,7 @@ class ImagePainterState extends State<ImagePainter> {
     final _zoomAdjustedOffset =
         _transformationController.toScene(onStart.localFocalPoint);
     if (!widget.isSignature) {
+      _controller.offsets.clear();
       _controller.setStart(_zoomAdjustedOffset);
 
       if (_controller.mode == PaintMode.text && !_controller.onTextUpdateMode) {
@@ -612,7 +613,22 @@ class ImagePainterState extends State<ImagePainter> {
     _controller.setEnd(_zoomAdjustedOffset);
     if (_controller.mode == PaintMode.freeStyle) {
       _controller.addOffsets(_zoomAdjustedOffset);
+    } else if (_controller.mode == PaintMode.mosaic) {
+      final last = _controller.offsets.lastOrNull;
+      if (last != null) {
+        final distance = (_zoomAdjustedOffset - last).distance;
+        if (distance >= _controller.brush.strokeWidth * 3) {
+          final count = (distance / (_controller.brush.strokeWidth * 2.8)).round();
+          print(count);
+          for (final i in List.generate(count, (index) => index+1)) {
+            _controller.addOffsets(
+              Offset.lerp(last, _zoomAdjustedOffset, i / count),
+            );
+          }
+        }
+      }
     }
+
     if (_controller.onTextUpdateMode) {
       _controller.onTextUpdateInfo?.offset = [_zoomAdjustedOffset];
     }
@@ -623,9 +639,13 @@ class ImagePainterState extends State<ImagePainter> {
     _controller.setInProgress(false);
     if (_controller.start != null &&
         _controller.end != null &&
-        (_controller.mode == PaintMode.freeStyle)) {
+        (_controller.mode == PaintMode.freeStyle || _controller.mode == PaintMode.mosaic)) {
       _controller.addOffsets(null);
-      _addFreeStylePoints();
+      if (_controller.mode == PaintMode.freeStyle) {
+        _addFreeStylePoints();
+      } else {
+        _addMosaicPoints();
+      }
       _controller.offsets.clear();
     } else if (_controller.start != null &&
         _controller.end != null &&
@@ -650,6 +670,14 @@ class ImagePainterState extends State<ImagePainter> {
           mode: PaintMode.freeStyle,
         ),
       );
+
+  void _addMosaicPoints() => _addPaintHistory(
+    PaintInfo(
+      offset: <Offset?>[..._controller.offsets],
+      paint: _paint,
+      mode: PaintMode.mosaic,
+    ),
+  );
 
   ///Provides [ui.Image] of the recorded canvas to perform action.
   Future<ui.Image> _renderImage() async {

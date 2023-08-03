@@ -94,14 +94,14 @@ List<ModeData> paintModes2(TextDelegate textDelegate) => [
       icon: AssetImage(textDelegate.drawingAssetName),
       mode: PaintMode.freeStyle,
       label: textDelegate.drawing),
-  // ModeData(
-  //     icon: AssetImage(textDelegate.dashLineAssetName),
-  //     mode: PaintMode.dashLine,
-  //     label: textDelegate.dashLine),
   ModeData(
       icon: AssetImage(textDelegate.textAssetName),
       mode: PaintMode.text,
-      label: textDelegate.moveText),
+      label: textDelegate.text),
+  ModeData(
+      icon: AssetImage(textDelegate.mosaicAssetName),
+      mode: PaintMode.mosaic,
+      label: textDelegate.mosaicName),
 ];
 
 @immutable

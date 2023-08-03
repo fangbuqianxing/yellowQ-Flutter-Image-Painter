@@ -17,6 +17,8 @@ class TextDelegate {
   late final String textAssetName;
   final String moveText = "Move text";
   late final String moveTextAssetName;
+  final String mosaicName = "Mosaic";
+  late final String mosaicAssetName;
   final String changeMode = "Change Mode";
   late final String changeModeAssetName;
   final String changeColor = "Change Color";

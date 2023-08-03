@@ -94,25 +94,14 @@ class DrawImage extends CustomPainter {
           }
           break;
         case PaintMode.text:
-          final textSpan = TextSpan(
-            text: item.text,
-            style: TextStyle(
-                color: _painter!.color,
-                fontSize: 6 * _painter.strokeWidth,
-                fontWeight: FontWeight.bold),
-          );
-          final textPainter = TextPainter(
-            text: textSpan,
-            textAlign: TextAlign.center,
-            textDirection: TextDirection.ltr,
-          );
-          textPainter.layout(minWidth: 0, maxWidth: size.width);
-          final textOffset = _offset!.isEmpty
-              ? Offset(size.width / 2 - textPainter.width / 2,
-                  size.height / 2 - textPainter.height / 2)
-              : Offset(_offset[0]!.dx - textPainter.width / 2,
-                  _offset[0]!.dy - textPainter.height / 2);
-          textPainter.paint(canvas, textOffset);
+          item.textPainter.paint(canvas, item.textOffset());
+          break;
+        case PaintMode.mosaic:
+          for (var i = 0; i < _offset!.length; i++) {
+            if (_offset[i] != null) {
+              paintMosaic(canvas, _offset[i]!, _painter!.strokeWidth);
+            }
+          }
           break;
         default:
       }
@@ -156,6 +145,13 @@ class DrawImage extends CustomPainter {
             } else if (points[i] != null && points[i + 1] == null) {
               canvas.drawPoints(PointMode.points,
                   [Offset(points[i]!.dx, points[i]!.dy)], _paint);
+            }
+          }
+          break;
+        case PaintMode.mosaic:
+          for (var i = 0; i < _controller.offsets.length; i++) {
+            if (_controller.offsets[i]!= null) {
+              paintMosaic(canvas, _controller.offsets[i]!, _paint.strokeWidth);
             }
           }
           break;
@@ -206,6 +202,43 @@ class DrawImage extends CustomPainter {
     return dashPath;
   }
 
+  //for draw [DrawStyle.mosaic]
+  void paintMosaic(Canvas canvas, Offset center, double mosaicWidth) {
+    const black1 = Color(0xFE808080);
+    const black2 = Color(0xCDA9A9A9);
+    final  paint = Paint()..color = black1..blendMode = BlendMode.srcOver;
+    final size = mosaicWidth;
+    final halfSize = size * 0.5;
+    final b1 = Rect.fromCenter(center: center.translate(-halfSize, -halfSize),width: size,height: size);
+    //0,0
+    canvas.drawRect(b1, paint);
+    //[black87], [black54], [black45], [black38], [black26], [black12]
+    paint.color = black2;
+    //0,1
+    canvas.drawRect(b1.translate(0, size), paint);
+    paint.color = black1;
+    //0,2
+    canvas.drawRect(b1.translate(0, size*2), paint);
+    paint.color = black2;
+    //1,0
+    canvas.drawRect(b1.translate(size, 0), paint);
+    paint.color = black1;
+    //1,1
+    canvas.drawRect(b1.translate(size, size), paint);
+    paint.color = black2;
+    //1,2
+    canvas.drawRect(b1.translate(size, size*2), paint);
+    paint.color = black1;
+    //2,0
+    canvas.drawRect(b1.translate(size*2, 0), paint);
+    paint.color = black2;
+    //2,1
+    canvas.drawRect(b1.translate(size*2, size), paint);
+    paint.color = black1;
+    //2,2
+    canvas.drawRect(b1.translate(size*2, size*2), paint);
+  }
+
   @override
   bool shouldRepaint(DrawImage oldInfo) {
     return oldInfo._controller != _controller;
@@ -237,7 +270,10 @@ enum PaintMode {
   circle,
 
   ///Allows to draw dashed line between two point.
-  dashLine
+  dashLine,
+
+  /// Allows to draw mosaic
+  mosaic,
 }
 
 ///[PaintInfo] keeps track of a single unit of shape, whichever selected.
@@ -255,6 +291,7 @@ class PaintInfo {
   ///Used to save text in case of text type.
   String? text;
 
+  /// Drawing image size
   Size? maxSize;
 
   late TextSpan textSpan;

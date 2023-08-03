@@ -50,6 +50,9 @@ class DutchTextDelegate implements TextDelegate {
   String get saveImage => 'Save Image';
 
   @override
+  String get mosaicName => "Mosaic";
+
+  @override
   String arrowAssetName = 'assets/icon_arrow_asset.png';
 
   @override
@@ -96,4 +99,7 @@ class DutchTextDelegate implements TextDelegate {
 
   @override
   String undoAssetName = 'assets/icon_undo_asset.png';
+
+  @override
+  String mosaicAssetName = 'assets/icon_mosaic_asset.png';
 }
