@@ -610,6 +610,7 @@ class ImagePainterState extends State<ImagePainter> {
     if (_controller.start == null) {
       _controller.setStart(_zoomAdjustedOffset);
     }
+    final offset = _zoomAdjustedOffset - (_controller.end ?? _controller.start ?? Offset(imageSize.width*0.5, imageSize.height*0.5));
     _controller.setEnd(_zoomAdjustedOffset);
     if (_controller.mode == PaintMode.freeStyle) {
       _controller.addOffsets(_zoomAdjustedOffset);
@@ -627,10 +628,9 @@ class ImagePainterState extends State<ImagePainter> {
           }
         }
       }
-    }
-
-    if (_controller.onTextUpdateMode) {
-      _controller.onTextUpdateInfo?.offset = [_zoomAdjustedOffset];
+    } else if (_controller.onTextUpdateMode) {
+      final last = _controller.onTextUpdateInfo?.offset?.lastOrNull;
+      _controller.onTextUpdateInfo?.offset = [last == null ? _zoomAdjustedOffset : last + offset];
     }
   }
 

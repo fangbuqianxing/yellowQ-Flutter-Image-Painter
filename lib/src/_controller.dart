@@ -143,7 +143,7 @@ class Controller extends ChangeNotifier {
   }
 
   PaintInfo? onTextUpdate(Offset offset) {
-    for (final paintInfo in _paintHistory) {
+    for (final paintInfo in _paintHistory.reversed) {
       if (paintInfo.mode != PaintMode.text) continue;
       if (paintInfo.textRect().contains(offset)) {
         return paintInfo;

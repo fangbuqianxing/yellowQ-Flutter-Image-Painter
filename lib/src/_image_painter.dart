@@ -150,7 +150,7 @@ class DrawImage extends CustomPainter {
           break;
         case PaintMode.mosaic:
           for (var i = 0; i < _controller.offsets.length; i++) {
-            if (_controller.offsets[i]!= null) {
+            if (_controller.offsets[i] != null) {
               paintMosaic(canvas, _controller.offsets[i]!, _paint.strokeWidth);
             }
           }
@@ -206,10 +206,15 @@ class DrawImage extends CustomPainter {
   void paintMosaic(Canvas canvas, Offset center, double mosaicWidth) {
     const black1 = Color(0xFE808080);
     const black2 = Color(0xCDA9A9A9);
-    final  paint = Paint()..color = black1..blendMode = BlendMode.srcOver;
+    final paint = Paint()
+      ..color = black1
+      ..blendMode = BlendMode.srcOver;
     final size = mosaicWidth;
     final halfSize = size * 0.5;
-    final b1 = Rect.fromCenter(center: center.translate(-halfSize, -halfSize),width: size,height: size);
+    final b1 = Rect.fromCenter(
+        center: center.translate(-halfSize, -halfSize),
+        width: size,
+        height: size);
     //0,0
     canvas.drawRect(b1, paint);
     //[black87], [black54], [black45], [black38], [black26], [black12]
@@ -218,7 +223,7 @@ class DrawImage extends CustomPainter {
     canvas.drawRect(b1.translate(0, size), paint);
     paint.color = black1;
     //0,2
-    canvas.drawRect(b1.translate(0, size*2), paint);
+    canvas.drawRect(b1.translate(0, size * 2), paint);
     paint.color = black2;
     //1,0
     canvas.drawRect(b1.translate(size, 0), paint);
@@ -227,16 +232,16 @@ class DrawImage extends CustomPainter {
     canvas.drawRect(b1.translate(size, size), paint);
     paint.color = black2;
     //1,2
-    canvas.drawRect(b1.translate(size, size*2), paint);
+    canvas.drawRect(b1.translate(size, size * 2), paint);
     paint.color = black1;
     //2,0
-    canvas.drawRect(b1.translate(size*2, 0), paint);
+    canvas.drawRect(b1.translate(size * 2, 0), paint);
     paint.color = black2;
     //2,1
-    canvas.drawRect(b1.translate(size*2, size), paint);
+    canvas.drawRect(b1.translate(size * 2, size), paint);
     paint.color = black1;
     //2,2
-    canvas.drawRect(b1.translate(size*2, size*2), paint);
+    canvas.drawRect(b1.translate(size * 2, size * 2), paint);
   }
 
   @override
@@ -320,19 +325,25 @@ class PaintInfo {
       );
       textPainter.layout(minWidth: 0, maxWidth: (maxSize?.width ?? 100));
       maxSize ??= Size.zero;
+      if (offset?.isEmpty ?? true) {
+        offset = [Offset(maxSize!.width / 2, maxSize!.height / 2)];
+      }
     }
   }
 
   Offset textOffset() {
-    return (offset?.isEmpty ?? true)
-        ? Offset(maxSize!.width / 2, maxSize!.height / 2)
-        : Offset(offset![0]!.dx, offset![0]!.dy);
+    return ((offset?.isEmpty ?? true)
+            ? Offset(maxSize!.width / 2, maxSize!.height / 2)
+            : Offset(offset![0]!.dx, offset![0]!.dy)) -
+        Offset(textPainter.width / 2, textPainter.height / 2);
   }
 
   Rect textRect() => Rect.fromCenter(
-        center: textOffset(),
-        width: textPainter.width,
-        height: textPainter.height);
+      center: ((offset?.isEmpty ?? true)
+          ? Offset(maxSize!.width / 2, maxSize!.height / 2)
+          : Offset(offset![0]!.dx, offset![0]!.dy)),
+      width: textPainter.width,
+      height: textPainter.height);
 }
 
 @immutable
