@@ -610,7 +610,10 @@ class ImagePainterState extends State<ImagePainter> {
     if (_controller.start == null) {
       _controller.setStart(_zoomAdjustedOffset);
     }
-    final offset = _zoomAdjustedOffset - (_controller.end ?? _controller.start ?? Offset(imageSize.width*0.5, imageSize.height*0.5));
+    final offset = _zoomAdjustedOffset -
+        (_controller.end ??
+            _controller.start ??
+            Offset(imageSize.width * 0.5, imageSize.height * 0.5));
     _controller.setEnd(_zoomAdjustedOffset);
     if (_controller.mode == PaintMode.freeStyle) {
       _controller.addOffsets(_zoomAdjustedOffset);
@@ -619,9 +622,9 @@ class ImagePainterState extends State<ImagePainter> {
       if (last != null) {
         final distance = (_zoomAdjustedOffset - last).distance;
         if (distance >= _controller.brush.strokeWidth * 3) {
-          final count = (distance / (_controller.brush.strokeWidth * 2.8)).round();
-          print(count);
-          for (final i in List.generate(count, (index) => index+1)) {
+          final count =
+              (distance / (_controller.brush.strokeWidth * 2.8)).round();
+          for (final i in List.generate(count, (index) => index + 1)) {
             _controller.addOffsets(
               Offset.lerp(last, _zoomAdjustedOffset, i / count),
             );
@@ -630,7 +633,9 @@ class ImagePainterState extends State<ImagePainter> {
       }
     } else if (_controller.onTextUpdateMode) {
       final last = _controller.onTextUpdateInfo?.offset?.lastOrNull;
-      _controller.onTextUpdateInfo?.offset = [last == null ? _zoomAdjustedOffset : last + offset];
+      _controller.onTextUpdateInfo?.offset = [
+        last == null ? _zoomAdjustedOffset : last + offset
+      ];
     }
   }
 
@@ -639,7 +644,8 @@ class ImagePainterState extends State<ImagePainter> {
     _controller.setInProgress(false);
     if (_controller.start != null &&
         _controller.end != null &&
-        (_controller.mode == PaintMode.freeStyle || _controller.mode == PaintMode.mosaic)) {
+        (_controller.mode == PaintMode.freeStyle ||
+            _controller.mode == PaintMode.mosaic)) {
       _controller.addOffsets(null);
       if (_controller.mode == PaintMode.freeStyle) {
         _addFreeStylePoints();
@@ -672,12 +678,12 @@ class ImagePainterState extends State<ImagePainter> {
       );
 
   void _addMosaicPoints() => _addPaintHistory(
-    PaintInfo(
-      offset: <Offset?>[..._controller.offsets],
-      paint: _paint,
-      mode: PaintMode.mosaic,
-    ),
-  );
+        PaintInfo(
+          offset: <Offset?>[..._controller.offsets],
+          paint: _paint,
+          mode: PaintMode.mosaic,
+        ),
+      );
 
   ///Provides [ui.Image] of the recorded canvas to perform action.
   Future<ui.Image> _renderImage() async {
@@ -922,8 +928,8 @@ class ImagePainterState extends State<ImagePainter> {
     final EdgeInsets padding;
     if (Platform.isMacOS) {
       padding = const EdgeInsets.fromLTRB(84, 0, 20, 0);
-      } else {
-      padding = const EdgeInsets.fromLTRB(20, 0, 64, 0);
+    } else {
+      padding = const EdgeInsets.fromLTRB(20, 0, 20, 0);
     }
     return Container(
       height: 44,
