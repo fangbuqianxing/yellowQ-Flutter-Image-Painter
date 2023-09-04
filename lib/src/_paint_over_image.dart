@@ -927,7 +927,7 @@ class ImagePainterState extends State<ImagePainter> {
     ]);
     final EdgeInsets padding;
     if (Platform.isMacOS) {
-      padding = const EdgeInsets.fromLTRB(84, 0, 20, 0);
+      padding = const EdgeInsets.fromLTRB(46, 0, 20, 0);
     } else {
       padding = const EdgeInsets.fromLTRB(20, 0, 20, 0);
     }
